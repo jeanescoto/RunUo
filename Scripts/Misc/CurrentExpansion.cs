@@ -19,6 +19,9 @@ namespace Server
 			Mobile.GuildClickMessage = !Enabled;
 			Mobile.AsciiClickMessage = !Enabled;
 
+			// OSI-style action delay
+			//Mobile.ActionDelay = TimeSpan.FromSeconds( 1.0 );
+
 			if ( Enabled )
 			{
 				AOS.DisableStatInfluences();
@@ -26,7 +29,6 @@ namespace Server
 				if ( ObjectPropertyList.Enabled )
 					PacketHandlers.SingleClickProps = true; // single click for everything is overriden to check object property list
 
-				Mobile.ActionDelay = TimeSpan.FromSeconds( 1.0 );
 				Mobile.AOSStatusHandler = new AOSStatusHandler( AOS.GetStatus );
 			}
 		}

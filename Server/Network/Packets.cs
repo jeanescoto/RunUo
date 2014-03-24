@@ -3371,6 +3371,9 @@ namespace Server.Network
 			m_Stream.Write( (byte) beheld.GetPacketFlags() );
 			m_Stream.Write( (byte) Notoriety.Compute( beholder, beheld ) );
 
+			NetState ns = beholder.RawNetState;
+			bool useHueFlag = ( ns == null || !ns.NewMobileIncoming );
+
 			for ( int i = 0; i < eq.Count; ++i )
 			{
 				Item item = eq[i];
@@ -3386,17 +3389,21 @@ namespace Server.Network
 					if ( beheld.SolidHueOverride >= 0 )
 						hue = beheld.SolidHueOverride;
 
-					int itemID = item.ItemID & 0x7FFF;
-					bool writeHue = ( hue != 0 );
+					int itemID = item.ItemID & 0xFFFF;
 
-					if ( writeHue )
-						itemID |= 0x8000;
+					if ( useHueFlag )
+					{
+						itemID &= 0x7FFF;
+
+						if ( hue != 0 )
+							itemID |= 0x8000;
+					}
 
 					m_Stream.Write( (int) item.Serial );
 					m_Stream.Write( (ushort) itemID );
 					m_Stream.Write( (byte) layer );
 
-					if ( writeHue )
+					if ( !useHueFlag || hue != 0 )
 						m_Stream.Write( (short) hue );
 				}
 			}
@@ -3411,18 +3418,21 @@ namespace Server.Network
 					if( beheld.SolidHueOverride >= 0 )
 						hue = beheld.SolidHueOverride;
 
-					int itemID = beheld.HairItemID & 0x7FFF;
+					int itemID = beheld.HairItemID & 0xFFFF;
 
-					bool writeHue = (hue != 0);
+					if ( useHueFlag )
+					{
+						itemID &= 0x7FFF;
 
-					if( writeHue )
-						itemID |= 0x8000;
+						if ( hue != 0 )
+							itemID |= 0x8000;
+					}
 
 					m_Stream.Write( (int)HairInfo.FakeSerial( beheld ) );
 					m_Stream.Write( (ushort)itemID );
 					m_Stream.Write( (byte)Layer.Hair );
 
-					if( writeHue )
+					if ( !useHueFlag || hue != 0 )
 						m_Stream.Write( (short)hue );
 				}
 			}
@@ -3437,18 +3447,21 @@ namespace Server.Network
 					if( beheld.SolidHueOverride >= 0 )
 						hue = beheld.SolidHueOverride;
 
-					int itemID = beheld.FacialHairItemID & 0x7FFF;
+					int itemID = beheld.FacialHairItemID & 0xFFFF;
 
-					bool writeHue = (hue != 0);
+					if ( useHueFlag )
+					{
+						itemID &= 0x7FFF;
 
-					if( writeHue )
-						itemID |= 0x8000;
+						if ( hue != 0 )
+							itemID |= 0x8000;
+					}
 
 					m_Stream.Write( (int)FacialHairInfo.FakeSerial( beheld ) );
 					m_Stream.Write( (ushort)itemID );
 					m_Stream.Write( (byte)Layer.FacialHair );
 
-					if( writeHue )
+					if ( !useHueFlag || hue != 0 )
 						m_Stream.Write( (short)hue );
 				}
 			}
@@ -3930,6 +3943,8 @@ namespace Server.Network
 		EnemyTargetShare	= 1 << 22,
 		FilterSeason	= 1 << 23,
 		SpellTargetShare	= 1 << 24,
+		HumanoidHealthChecks	= 1 << 25,
+		SpeechJournalChecks	= 1 << 26,
 
 		All				= ulong.MaxValue
 	}
